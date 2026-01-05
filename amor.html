@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Te amo - Carrusel</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root{
+      --accent:#ff6b9e;
+      --bg:#ffeef5;
+      --text:#3b2a3a;
+    }
+    html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;}
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:2rem;
+      color:var(--text);
+    }
+
+    .wrap{
+      width:min(980px,100%);
+      max-width:980px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(255,255,255,0.90));
+      border-radius:14px;
+      box-shadow: 0 8px 30px rgba(59,42,58,0.12);
+      padding:1rem;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .title{
+      text-align:center;
+      font-size:2rem;
+      margin:8px 0 12px;
+      font-weight:700;
+      color:var(--accent);
+      letter-spacing:1px;
+    }
+
+    .carousel{
+      position:relative;
+      overflow:hidden;
+      border-radius:10px;
+    }
+
+    .slides{
+      display:flex;
+      transition:transform 0.5s ease;
+      will-change:transform;
+    }
+
+    .slide{
+      min-width:100%;
+      box-sizing:border-box;
+      padding:0.5rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .slide img{
+      width:100%;
+      height:420px;
+      max-height:65vh;
+      object-fit:cover;
+      border-radius:8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    }
+
+    /* flechas */
+    .btn{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      background:rgba(255,255,255,0.85);
+      border:none;
+      width:44px;
+      height:44px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      box-shadow:0 4px 12px rgba(0,0,0,0.08);
+      font-size:1.2rem;
+      color:var(--accent);
+    }
+    .btn:hover{transform:translateY(-50%) scale(1.03);}
+    .prev{left:10px;}
+    .next{right:10px;}
+
+    /* indicadores */
+    .dots{
+      display:flex;
+      gap:8px;
+      justify-content:center;
+      margin-top:10px;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;background:rgba(59,42,58,0.2);cursor:pointer;
+    }
+    .dot.active{background:var(--accent);box-shadow:0 0 0 4px rgba(255,107,158,0.14);}
+
+    /* Fondo y animaciones de corazones movidos a styles.css */
+    
+
+    /* responsivo */
+    @media (max-width:600px){
+      .title{font-size:1.4rem;}
+      .slide img{height:260px;}
+      .btn{width:36px;height:36px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 class="title">Te amo Marchely❤️</h1>
+
+    <div class="carousel" id="carousel">
+      <div class="slides" id="slides">
+        <!-- Las imágenes se generan dinámicamente desde la carpeta images/ -->
+      </div>
+
+      <button class="btn prev" id="prev" aria-label="Anterior">&larr;</button>
+      <button class="btn next" id="next" aria-label="Siguiente">&rarr;</button>
+    </div>
+
+    <div class="dots" id="dots" aria-hidden="false"></div>
+    <div class="floating-hearts" id="floating-hearts" aria-hidden="true"></div>
+
+    <!-- Sección de poemas debajo del carrusel -->
+    <section class="poems-section" id="poems-section" aria-labelledby="poems-title">
+      <h2 id="poems-title" class="poems-title">Poemas ❤️</h2>
+      <div class="poem-list" id="poem-list">
+        <article class="poem">
+          <h3>Pequeño latido</h3>
+          <p>Tu risa es luna llena en mi pecho,<br>un latido suave que enciende el tiempo.</p>
+        </article>
+        <article class="poem">
+          <h3>Susurro</h3>
+          <p>En cada silencio tus palabras viven,<br>un susurro dulce que no se olvida.</p>
+        </article>
+        <article class="poem">
+          <h3>Fuego y ternura</h3>
+          <p>Entre fuego y ternura aprendí a nombrarte,<br>te amo en cada verso que me comparte.</p>
+        </article>
+      </div>
+      <div class="poem-actions">
+        <button id="add-poem" class="small-btn">Añadir poema</button>
+        <button id="toggle-music" class="small-btn music-btn" aria-pressed="false">Desactivar música</button>
+      </div>
+
+      <div class="music-links">
+        <a id="music-file-link" href="Mike%20Bah%C3%ADa%20-%20Busc%C3%A1ndote%20(Audio%20Oficial)-null.mp3" download>Descargar canción</a>
+        <a id="music-open-link" href="Mike%20Bah%C3%ADa%20-%20Busc%C3%A1ndote%20(Audio%20Oficial)-null.mp3" target="_blank" rel="noopener">Abrir en nueva pestaña</a>
+        <audio id="bg-audio" src="Mike%20Bah%C3%ADa%20-%20Busc%C3%A1ndote%20(Audio%20Oficial)-null.mp3" preload="auto"></audio>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (function(){
+      const slides = document.getElementById('slides');
+      const prev = document.getElementById('prev');
+      const next = document.getElementById('next');
+      const dotsWrap = document.getElementById('dots');
+      const floating = document.getElementById('floating-hearts');
+
+      // Control de audio: elemento <audio> en el DOM, reproduce una sola vez y permite desactivarlo
+      const MUSIC_KEY = 'amor_music_disabled_v1';
+      let musicDisabled = localStorage.getItem(MUSIC_KEY) === '1';
+      const audio = document.getElementById('bg-audio');
+      if(audio){ audio.loop = false; audio.preload = 'auto'; }
+
+      const toggleBtn = document.getElementById('toggle-music');
+      function updateMusicButton(){
+        if(!toggleBtn) return;
+        if(musicDisabled){
+          toggleBtn.innerText = 'Reproducir música';
+          toggleBtn.setAttribute('aria-pressed','false');
+        }else if(audio && !audio.paused){
+          toggleBtn.innerText = 'Desactivar música';
+          toggleBtn.setAttribute('aria-pressed','true');
+        }else{
+          toggleBtn.innerText = 'Reproducir música';
+          toggleBtn.setAttribute('aria-pressed','false');
+        }
+      }
+
+      function tryPlayAudio(){
+        if(musicDisabled || !audio) { updateMusicButton(); return; }
+        audio.play().then(()=>{ updateMusicButton(); }).catch((err)=>{ console.warn('Autoplay bloqueado:', err); updateMusicButton(); });
+      }
+
+      toggleBtn && toggleBtn.addEventListener('click', ()=>{
+        if(!audio) return;
+        if(audio.paused){
+          // reproducir
+          musicDisabled = false;
+          localStorage.removeItem(MUSIC_KEY);
+          audio.currentTime = 0;
+          audio.play().catch(()=>{/* si falla, no romper */});
+        }else{
+          // desactivar (pausa)
+          audio.pause();
+          musicDisabled = true;
+          localStorage.setItem(MUSIC_KEY,'1');
+        }
+        updateMusicButton();
+      });
+
+      audio && audio.addEventListener('ended', ()=>{ updateMusicButton(); });
+
+      // intentamos reproducir al cargar
+      tryPlayAudio();
+
+      // Lista de imágenes en la carpeta images/ (asegúrate de que coincidan nombres)
+      const imagePaths = [
+        'images/WhatsApp%20Image%202026-01-01%20at%209.42.07%20PM.jpeg',
+        'images/WhatsApp%20Image%202026-01-01%20at%209.42.06%20PM.jpeg',
+        'images/WhatsApp%20Image%202026-01-01%20at%209.42.05%20PM.jpeg',
+        'images/WhatsApp%20Image%202026-01-01%20at%209.42.04%20PM.jpeg',
+        'images/WhatsApp%20Image%202026-01-01%20at%209.42.03%20PM.jpeg',
+        'images/foto2%20.jpeg',
+        'images/foto%204.jpeg',
+        'images/foto%203.jpeg',
+        'images/foto%201.jpeg'
+      ];
+
+      function populateSlides(){
+        slides.innerHTML = '';
+        imagePaths.forEach((p,i)=>{
+          const s = document.createElement('div');
+          s.className = 'slide';
+          const img = document.createElement('img');
+          img.src = p;
+          img.alt = `Foto ${i+1}`;
+          s.appendChild(img);
+          slides.appendChild(s);
+        });
+      }
+
+      populateSlides();
+
+      let slideCount = slides.children.length;
+      let idx = 0;
+      let interval = 4000;
+      let timer;
+
+      function renderDots(){
+        dotsWrap.innerHTML = '';
+        for(let i=0;i<slideCount;i++){
+          const d = document.createElement('div');
+          d.className = 'dot' + (i===0?' active':'');
+          d.dataset.index = i;
+          d.addEventListener('click', ()=> goTo(i));
+          dotsWrap.appendChild(d);
+        }
+      }
+
+      function update(){
+        slides.style.transform = `translateX(${-idx * 100}%)`;
+        document.querySelectorAll('.dot').forEach((el,i)=>{
+          el.classList.toggle('active', i===idx);
+        });
+      }
+
+      function nextSlide(){
+        idx = (idx + 1) % slideCount;
+        update();
+      }
+      function prevSlide(){
+        idx = (idx - 1 + slideCount) % slideCount;
+        update();
+      }
+      function goTo(i){
+        idx = i;
+        update();
+      }
+
+      prev.addEventListener('click', ()=>{ prevSlide(); resetTimer(); });
+      next.addEventListener('click', ()=>{ nextSlide(); resetTimer(); });
+
+      // autoplay
+      function startTimer(){ timer = setInterval(nextSlide, interval); }
+      function stopTimer(){ clearInterval(timer); }
+      function resetTimer(){ stopTimer(); startTimer(); }
+
+      // pausa al hover
+      const carousel = document.getElementById('carousel');
+      carousel.addEventListener('mouseenter', stopTimer);
+      carousel.addEventListener('mouseleave', startTimer);
+
+      // teclado
+      document.addEventListener('keydown', (e)=>{
+        if(e.key === 'ArrowLeft') prevSlide();
+        if(e.key === 'ArrowRight') nextSlide();
+      });
+
+      renderDots();
+      update();
+      startTimer();
+
+      // Corazones flotantes "hot"
+      const emojis = ['❤️','🔥','😍','😘','💋'];
+      function createHeart(){
+        const h = document.createElement('div');
+        h.className = 'heart';
+        h.innerText = emojis[Math.floor(Math.random()*emojis.length)];
+        h.style.left = Math.random()*100 + '%';
+        h.style.fontSize = `${12 + Math.random()*36}px`;
+        h.style.animationDuration = `${3 + Math.random()*3}s`;
+        floating.appendChild(h);
+        setTimeout(()=> { h.remove(); }, (parseFloat(h.style.animationDuration)*1000) + 500);
+      }
+      // Crea corazones de forma continua (puedes ajustar intervalo)
+      setInterval(createHeart, 700);
+
+      // --- Manejo de poemas con persistencia en localStorage ---
+      const addBtn = document.getElementById('add-poem');
+      const poemList = document.getElementById('poem-list');
+      const POEMS_KEY = 'amor_poems_v1';
+      let poems = [];
+
+      function loadPoems(){
+        try{ poems = JSON.parse(localStorage.getItem(POEMS_KEY)) || []; }catch(e){ poems = []; }
+        renderPoems();
+      }
+      function savePoems(){ localStorage.setItem(POEMS_KEY, JSON.stringify(poems)); }
+
+      function renderPoems(){
+        poemList.innerHTML = '';
+        if(poems.length === 0){
+          const note = document.createElement('div');
+          note.className = 'no-poems';
+          note.innerText = 'Todavía no hay poemas. Usa "Añadir poema" para crear uno.';
+          poemList.appendChild(note);
+          return;
+        }
+        poems.forEach((pm, idx)=>{
+          const art = document.createElement('article');
+          art.className = 'poem';
+          const h3 = document.createElement('h3'); h3.innerText = pm.title;
+          const p = document.createElement('p'); p.innerHTML = pm.text.replace(/\n/g,'<br>');
+
+          const controls = document.createElement('div'); controls.className = 'poem-controls';
+          const del = document.createElement('button'); del.className = 'small-btn danger'; del.innerText = 'Eliminar';
+          del.addEventListener('click', ()=>{
+            if(!confirm('¿Eliminar este poema?')) return;
+            poems.splice(idx,1); savePoems(); renderPoems();
+          });
+
+          controls.appendChild(del);
+          art.appendChild(h3); art.appendChild(p); art.appendChild(controls);
+          poemList.appendChild(art);
+        });
+      }
+
+      addBtn.addEventListener('click', ()=>{
+        const title = prompt('Título del poema');
+        if(!title) return;
+        const text = prompt('Texto del poema (usa \n para saltos de línea)');
+        if(!text) return;
+        poems.push({ title: title.trim(), text: text.trim() });
+        savePoems(); renderPoems();
+        document.getElementById('poems-section').scrollIntoView({ behavior: 'smooth' });
+      });
+
+      // Inicializar carga de poemas
+      loadPoems();
+    })();
+  </script>
+</body>
+</html>

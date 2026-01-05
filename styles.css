@@ -1,0 +1,56 @@
+:root{ --accent:#ff6b9e; --bg:#ffeef5; --text:#3b2a3a; }
+
+/* Fondo animado de corazones */
+body{
+  background-color: var(--bg);
+  background-image: linear-gradient(180deg, rgba(255,36,68,0.06), rgba(255,107,158,0.04)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 32 32'%3E%3Cpath fill='%23ff2444' d='M23.6 4c-2.4 0-4.4 1.6-5.6 3.2C16.8 5.6 14.8 4 12.4 4 8 4 5 7 5 11.4c0 7.2 11 12.8 11 12.8s11-5.6 11-12.8C27 7 24 4 23.6 4z'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 120px 120px;
+  background-blend-mode: overlay;
+  animation: moveBackground 20s linear infinite;
+  background-attachment: fixed;
+}
+
+@keyframes moveBackground{
+  from{ background-position: 0 0; }
+  to{ background-position: 1000px -1000px; }
+}
+
+/* Corazones flotantes (generados por JS) */
+.floating-hearts{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:3; }
+.floating-hearts .heart{ position:absolute; bottom:-10px; opacity:0.95; transform:translateY(0); animation:floatUp 4s linear forwards; will-change:transform,opacity; text-shadow:0 4px 12px rgba(0,0,0,0.12); font-family:inherit; }
+@keyframes floatUp{
+  0%{ transform: translateY(0) scale(0.9); opacity:0 }
+  10%{ opacity:1 }
+  100%{ transform: translateY(-140%) scale(1.1); opacity:0 }
+}
+
+/* Asegurar que el contenedor esté por delante del fondo */
+.wrap{ position:relative; z-index:2; }
+
+/* Estilos para la sección de poemas */
+.poems-section{ margin-top:18px; padding:16px; background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.98)); border-radius:10px; box-shadow:0 8px 20px rgba(59,42,58,0.06); color:var(--text); }
+.poems-title{ text-align:center; font-size:1.4rem; color:var(--accent); margin:0 0 12px 0; }
+.poem-list{ display:flex; flex-direction:column; gap:10px; max-height:300px; overflow:auto; padding-right:8px; }
+.no-poems{ color:rgba(59,42,58,0.45); text-align:center; padding:10px 0; }
+.poem{ padding:10px 12px; background:transparent; border-left:4px solid rgba(255,107,158,0.18); word-wrap:break-word; }
+.poem h3{ margin:0 0 6px 0; font-size:1rem; color:#b21b48; }
+.poem p{ margin:0; line-height:1.45; color:#402b36; white-space:pre-wrap; }
+.poem-controls{ display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
+.poem-actions{ display:flex; justify-content:center; margin-top:12px; }
+.small-btn{ background:var(--accent); color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; box-shadow:0 6px 14px rgba(0,0,0,0.08); }
+.small-btn:hover{ transform:translateY(-2px); }
+.small-btn.danger{ background:#e04a5a; }
+.small-btn.danger:hover{ filter:brightness(0.95); transform:translateY(-2px); }
+
+@media (max-width:600px){ .poems-section{ padding:12px; } .poems-title{ font-size:1.1rem; } }
+
+/* Botón de música */
+.music-btn{ margin-left:8px; background:#7f2b47; }
+.music-btn[aria-pressed='true']{ box-shadow:0 6px 14px rgba(0,0,0,0.08); }
+
+.music-links{ display:flex; gap:12px; justify-content:center; margin-top:10px; }
+.music-links a{ color:#4a132b; text-decoration:underline; font-weight:600; }
+.music-links a:hover{ color:#7f2b47; }
+
+@media (max-width:420px){ .music-btn{ display:block; margin:10px auto 0; } .music-links{ flex-direction:column; gap:6px; } }
